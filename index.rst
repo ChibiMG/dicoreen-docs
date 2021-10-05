@@ -1,0 +1,18 @@
+
+Bienvenue sur la documentation de Dicoréen !
+============================================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contenu :
+
+   sphinx
+
+
+
+Indices et tables
+=================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
