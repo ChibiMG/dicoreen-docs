@@ -7,7 +7,7 @@ Bienvenue sur la documentation de Dicoréen !
    :caption: Contenu :
 
    sphinx
-   nestjs
+   nestjs/nestjs
 
 
 
