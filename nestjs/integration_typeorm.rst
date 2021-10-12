@@ -5,6 +5,7 @@ Prérequis : avoir installer PostgreSQL et créer la base dedans (ici "dicoreen"
 Suplément : installer Postman pour faire des requêtes.
 
 Utiliser TypeORM pour décrire les différentes entités de l'API. Nous allons stocker les données dans une base de données PostgreSQL.
+Un ORM (Object Relational Mapping) permet de manipuler les données via des entités et non en passant par des requêtes sur la base.
 Documentation : https://typeorm.io/#/
 
 Installation

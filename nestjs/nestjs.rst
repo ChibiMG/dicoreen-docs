@@ -1,8 +1,9 @@
 Backend avec NestJS
 ===================
 
-.. NestJS utilise le langage TypeScript.
-.. Tuto 1 : https://www.premieroctet.com/blog/bootstraper-api-avec-nestjs
+NestJS utilise le langage TypeScript.
+Tuto 1 : https://www.premieroctet.com/blog/bootstraper-api-avec-nestjs
+Documentation : https://docs.nestjs.com/
 
 Installation du CLI
 -------------------
@@ -47,3 +48,4 @@ Contenu
    integration_typeorm
    com_bdd
    doc_swagger
+   image_part.rst
