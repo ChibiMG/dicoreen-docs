@@ -80,11 +80,19 @@ Ajouter UUID (Universally Unique IDentifier) pour avour un nom unique pour le fi
 
 .. code-block::
 
+    nest g service file
+    nest g module file
+
+Service et module de gestion des fichiers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block::
+
     yarn add uuid @types/uuid
     nest g service file
     nest g module file
 
-Ajouter le code ci-desspus dans file.service.ts pour envoyer le fichier vers le bucket :
+Ajouter le code ci-desspus dans file.service.ts pour envoyer le fichier vers le bucket ou le supprimer :
 
 .. code-block::
 
@@ -95,15 +103,21 @@ Ajouter le code ci-desspus dans file.service.ts pour envoyer le fichier vers le 
     export class FileService {
     constructor(private readonly configService: ConfigService) {}
     
-    async uploadFile(dataBuffer: Buffer) {
-        const s3 = new S3({ endpoint: this.configService.get('AWS_ENDPOINT'), });
-        // Renommer le fichier par un uuid unique
-        const key = uuid();
-        // Uploader le fichier sur le bucket
-        await s3.upload({Bucket: this.configService.get('AWS_PUBLIC_BUCKET_NAME'), Body: dataBuffer, Key: key}).promise();
-        // Renvoyer du nom du fichier
-        return key;
-    }
+        async uploadFile(dataBuffer: Buffer) {
+            const s3 = new S3({ endpoint: this.configService.get('AWS_ENDPOINT'), });
+            // Renommer le fichier par un uuid unique
+            const key = uuid();
+            // Uploader le fichier sur le bucket
+            await s3.upload({Bucket: this.configService.get('AWS_PUBLIC_BUCKET_NAME'), Body: dataBuffer, Key: key}).promise();
+            // Renvoyer du nom du fichier
+            return key;
+        }
+
+        async removeFile(key: string) {
+            const s3 = new S3({ endpoint: this.configService.get('AWS_ENDPOINT'), });
+            //Supprimer le fichier sur le bucket
+            await s3.deleteObject({Bucket: this.configService.get('AWS_PUBLIC_BUCKET_NAME'), Key: key}).promise();
+        }
     }
 
 Remarque : ``v4 as uuid`` renomme la variable.
@@ -121,7 +135,10 @@ Dans file.module.ts ajouter les imports, exports et providers :
     })
     export class FileModule {}
 
-Dans theme.module.ts ajouter l'importe de FileModule :
+Ajout d'image pour Theme
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Dans theme.module.ts ajouter l'import de FileModule :
 
 .. code-block::
 
@@ -155,14 +172,17 @@ Dans theme.service.ts ajouter la méthode qui permet envoyer le fichier sur S3 e
         }
 
         /**
-        * Envoyer le fichier sur S3 et ajouter son chemin dans le theme
+        * Envoyer le fichier sur S3
+        * Modifier le theme
+        * Sauvegarder la nouvelle version du theme
         * @param theme 
         * @param imageBuffer 
         * @returns 
         */
         async addImage(theme: Theme, imageBuffer: Buffer) {
             const image = await this.fileService.uploadFile(imageBuffer);
-            await this.themeRepository.update(theme.id, { image });
+            theme.image = image;
+            await this.themeRepository.save(theme);
             return 'ok';
         }
     }
@@ -202,7 +222,55 @@ Enfin, ajouter la requête post d'ajout d'image dans theme.controller.ts :
         }
     }
 
-Il faut utiliser ce principe pour les images de l'entité Word.
+Suppression et modification d'image pour Theme
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+ Créer un fichier theme.subscriber.ts pour ajouter des fonctions annexes lors de l'executions de certaines fonctions CRUD.
+Ici nous avons créé des fonctions pour la suppression d'un thème et la modification.
+
+.. code-block::
+
+    // import ...
+
+    @Injectable()
+    export class ThemeSubscriber implements EntitySubscriberInterface<Theme> {
+        constructor(@InjectConnection() readonly connection: Connection, private readonly fileService: FileService) {
+            connection.subscribers.push(this);
+        }
+
+        listenTo() {
+            return Theme;
+        }
+
+        afterRemove(event: RemoveEvent<Theme>) {
+            this.fileService.removeFile(event.entity.image);
+        }
+
+        afterUpdate(event: UpdateEvent<Theme>) {
+            if (event.updatedColumns.find(element => element.propertyName == "image" != undefined)) {
+            this.fileService.removeFile(event.databaseEntity.image);
+            }
+        }
+    }
+
+Ajouter theme.subscriber.ts au providers du fichier theme.module.ts :
+
+.. code-block::
+
+    // import ...
+
+    @Module({
+    imports: [
+        TypeOrmModule.forFeature([Theme]),
+        FileModule,
+    ],
+    providers: [ThemeService, ThemeSubscriber],
+    controllers: [ThemeController]
+    })
+    export class ThemeModule {}
+
+
+Il faut utiliser ces mêmes principes pour les images de l'entité Word.
 
 Tests
 ^^^^^
