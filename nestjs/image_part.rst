@@ -225,7 +225,7 @@ Enfin, ajouter la requête post d'ajout d'image dans theme.controller.ts :
 Suppression et modification d'image pour Theme
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
- Créer un fichier theme.subscriber.ts pour ajouter des fonctions annexes lors de l'executions de certaines fonctions CRUD.
+Créer un fichier theme.subscriber.ts pour ajouter des fonctions annexes lors de l'executions de certaines fonctions CRUD.
 Ici nous avons créé des fonctions pour la suppression d'un thème et la modification.
 
 .. code-block::
@@ -243,11 +243,13 @@ Ici nous avons créé des fonctions pour la suppression d'un thème et la modifi
         }
 
         afterRemove(event: RemoveEvent<Theme>) {
-            this.fileService.removeFile(event.entity.image);
+            if(event.databaseEntity.image != undefined) {
+                this.fileService.removeFile(event.entity.image);
+            }
         }
 
         afterUpdate(event: UpdateEvent<Theme>) {
-            if (event.updatedColumns.find(element => element.propertyName == "image" != undefined)) {
+            if (event.updatedColumns.find(element => element.propertyName == "image") != undefined && event.databaseEntity.image != undefined) {
             this.fileService.removeFile(event.databaseEntity.image);
             }
         }
