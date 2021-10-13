@@ -135,6 +135,14 @@ Exemple, contenu de theme.controller.js :
         model: {
             type: Theme,
         },
+        query: {
+            join: {
+                themes: {
+                    eager: true,
+                    allow: [],
+                }
+            }
+        }
     })
 
     @Controller('themes')

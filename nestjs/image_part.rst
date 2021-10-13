@@ -23,8 +23,8 @@ Il permet d'ajouter la configuration vers le bucket : la région, la clé d'acc�
     AWS_REGION=fr-par
     AWS_ACCESS_KEY_ID=*****
     AWS_SECRET_ACCESS_KEY=*****
-    AWS_PUBLIC_BUCKET_NAME=dicoreen-bucket
-    AWS_ENDPOINT=https://dicoreen-bucket.s3.fr-par.scw.cloud
+    AWS_PUBLIC_BUCKET_NAME=dicoreen-dev
+    AWS_ENDPOINT=https://s3.fr-par.scw.cloud
 
 Installer le module config permettant d'accèder au ConfigService :
 
