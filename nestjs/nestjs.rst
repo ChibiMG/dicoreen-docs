@@ -49,3 +49,4 @@ Contenu
    com_bdd
    doc_swagger
    image_part.rst
+   deploiement_heroku

@@ -115,6 +115,7 @@ CRUD : Create Read Update Delete
 
 En l'état, de l'API peut être fonctionelle si on y ajoute toutes les routes à la main, ce qui est fastidieux.
 NestJS fournit un module qui gère tous ces aspects, rendant le code bien plus léger.
+Documentation : https://github.com/nestjsx/crud
 
 Installation :
 

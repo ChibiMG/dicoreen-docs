@@ -1,0 +1,25 @@
+Déploiement du backend sur Heroku
+---------------------------------
+
+Prérequis : Avoir créer un compte sur le site https://www.heroku.com/
+Tuto 1 : https://dev.to/rosyshrestha/deploy-nestjs-typescript-app-to-heroku-27e
+
+Dans l'interface Heroku créer une nouvelle app :
+Choisir un nom
+Choisir une région (ici Europe)
+Choisir une méthode de déploiement (ici à partir d'un repo Github)
+
+Définir un port optionnel ver Heroku dans main.js :
+
+.. code-block::
+
+    await app.listen(process.env.PORT || 3000); 
+
+Créer un nouveau fichier nommé Procfile à la racine du projet et ajouter le code ci-dessous.
+Cela permet à Heroku de connaître la commande pour lancer l'app :
+
+.. code-block::
+
+    web: yarn start:prod
+
+Enfin, sur l'interface heroku, dans Settings>Config Vars> Reveal Config vars ajouter les variables que contient le fichier .env de votre projet en les adaptant au contexte de mise en production si besoin.
