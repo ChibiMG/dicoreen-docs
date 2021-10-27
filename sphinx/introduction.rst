@@ -1,13 +1,14 @@
-Documentation avec Sphinx
-=========================
+Introduction
+============
 
 Sphinx utilise le langage RST.
-Cheat Sheet : https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html#code-block-directive
 
 Installation
 ------------
 
-Prérequis : avoir installé Python et vérifier sa présence dans les variables d'environnement.
+.. note::
+
+    Python doit être installé et présent dans les variables d'environnement (PATH).
 
 .. code-block::
 
@@ -28,3 +29,8 @@ Génération
 .. code-block::
 
     make html
+
+.. note::
+
+    En cas de problème le projet peut etre nettoyé avec la commande ``make clean``.
+    

@@ -4,10 +4,23 @@ Bienvenue sur la documentation de Dicoréen !
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contenu :
+   :caption: Sphinx :
 
-   sphinx
-   nestjs/nestjs
+   sphinx/introduction
+   sphinx/deploiement
+   sphinx/cheat_sheet
+
+.. toctree::
+   :maxdepth: 2
+   :caption: NestJS :
+
+   nestjs/introduction
+   nestjs/integration_typeorm
+   nestjs/mod_cont_serv
+   nestjs/crud
+   nestjs/doc_swagger
+   nestjs/image_part
+   nestjs/deploiement_heroku
 
 
 

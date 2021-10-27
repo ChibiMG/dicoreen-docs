@@ -1,19 +1,32 @@
 Documentation de l'API avec Swagger
------------------------------------
+===================================
+
+Swagger permet de concevoir, créer, documenter et utiliser les services Web RESTful.
+Ici nous utilisons un module Swagger pour NestJS dans le but de générer automatiquement une documentation pour notre API.
+
+L'accès en local à la documentation Swagger se fait par le lien http://localhost:3000/swagger.
+
+.. tip::
+
+    Il est possible, de récupérer le JSON généré par swagger. Pour cela, il suffit d'ajouter ``-json`` à la fin de la route Swagger (http://localhost:3000/swagger-json).
+
 
 Installation
-^^^^^^^^^^^^
+------------
 
 .. code-block::
 
     yarn add @nestjs/swagger swagger-ui-express
 
 Initialisation
-^^^^^^^^^^^^^^
+--------------
 
-Contenu de main.ts :
+Initialiser la documentation swagger dans le ``main.ts`` :
 
 .. code-block::
+    :emphasize-lines: 8-15
+    :linenos:
+    :caption: main.ts
 
     import { NestFactory } from '@nestjs/core';
     import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -23,10 +36,10 @@ Contenu de main.ts :
         const app = await NestFactory.create(AppModule);
 
         const options = new DocumentBuilder()
-            .setTitle('Tuto nest')
-            .setDescription('API articles et auteurs')
+            .setTitle('Dicoréen NestJS')
+            .setDescription('Documentation de l\'API')
             .setVersion('1.0')
-            .addTag('tuto-nest')
+            .addTag('dicoreen')
             .build();
         const document = SwaggerModule.createDocument(app, options);
         SwaggerModule.setup('swagger', app, document);
@@ -36,22 +49,33 @@ Contenu de main.ts :
     bootstrap();
 
 Décoration des contrôleurs avec "@ApiTags"
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------------------
 
-Exemple, contenu de theme.controller.ts :
+L'annotation ``@ApiTags`` permet de catégoriser les controllers de modules.
+
+Exemple, contenu de ``theme.controller.ts`` :
 
 .. code-block::
+    :emphasize-lines: 19
+    :linenos:
+    :caption: theme.controller.ts
 
-    import { Controller } from '@nestjs/common';
+    // import ...
     import { ApiTags } from '@nestjs/swagger';
-    import { Crud } from '@nestjsx/crud';
-    import { Theme } from './theme.entity';
-    import { ThemeService } from './theme.service';
+    // ...
 
     @Crud({
         model: {
             type: Theme,
         },
+        query: {
+            join: {
+                themes: {
+                    eager: true,
+                    allow: [],
+                }
+            }
+        }
     })
 
     @ApiTags('themes')
@@ -61,11 +85,14 @@ Exemple, contenu de theme.controller.ts :
     }
 
 Génération automatique des schémas
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------------
 
-Contenu du fichier nest-cli.json :
+Enregistrer le plugin Swagger dans la configuration de NestJS, fichier ``nest-cli.json`` :
 
 .. code-block::
+    :emphasize-lines: 4-6
+    :linenos:
+    :caption: nest-cli.json
 
     {
         "collection": "@nestjs/schematics",
@@ -75,10 +102,17 @@ Contenu du fichier nest-cli.json :
         }
     }
 
-Ajout du décorateur ``@ApiProperty`` pour les relations Many to Many de nos entités.
-Exemple, contenu de theme.entity.js :
+Ajout du décorateur "@ApiProperty"
+----------------------------------
+
+L'annotation ``@ApiProperty`` est ajoutée pour générer les schémas lors de l'utilisation de relations entre des entités.
+
+Exemple, contenu de ``theme.entity.js`` :
 
 .. code-block::
+    :emphasize-lines: 21
+    :linenos:
+    :caption: theme.entity.ts
 
     import { ApiProperty } from '@nestjsx/crud/lib/crud';
     import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from 'typeorm';
@@ -104,10 +138,3 @@ Exemple, contenu de theme.entity.js :
         @ManyToMany(() => Word, word => word.themes)
         words: Word[];
     }
-
-Voir la documentation de L'API
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-http://localhost:3000/swagger
-
-Remarque : Il est possible, de récupérer le JSON généré par swagger. Pour cela, il suffit d'ajouter ``-json`` à la fin de la route Swagger (http://localhost:3000/swagger-json).

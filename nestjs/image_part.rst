@@ -1,24 +1,28 @@
-Intégration de Multer pour la gestion des images
-------------------------------------------------
+Envoi d'images sur Amazon S3
+============================
 
-Prérequis : avoir un bucket sur https://www.scaleway.com/fr/ et une clé API.
-Quickstart Scaleway : https://www.scaleway.com/en/docs/storage/object/quickstart/
-Tuto 1 : https://wanago.io/2020/08/03/api-nestjs-uploading-public-files-to-amazon-s3/
+Nous souhaitons créer une route ``/themes/{id}/image`` qui permet à l'utilisateur d'envoyer une image pour un thème donné, et qui enregistre cette image dans un bucket S3.
 
-Installation
-^^^^^^^^^^^^
+Nous utilisons ici Scaleway comme fournisseur cloud à la place d'AWS. Le SDK AWS peut être utlisé avec les fournisseurs alternatifs.
 
-.. code-block::
+.. note::
 
-    npm i -D @types/multer
+    Il faut créer un bucket sur https://www.scaleway.com/fr/ et une clé API. Il faut bien noter la clé privée donnée car celle-ci est unique et ne sera pas recommuniquée.
 
-Mise en place
-^^^^^^^^^^^^^
+**Références :**
+
+- Quickstart Scaleway : https://www.scaleway.com/en/docs/storage/object/quickstart/
+- Tuto 1 : https://wanago.io/2020/08/03/api-nestjs-uploading-public-files-to-amazon-s3/
+
+Configuration
+-------------
 
 Créer un fichier ``.env`` à la racine du projet et ajouter le code ci dessous.
-Il permet d'ajouter la configuration vers le bucket : la région, la clé d'accès, la clé secrète et le nom du bucket.
+Il permet d'ajouter la configuration vers le bucket : la région, la clé d'accès, la clé secrète, le nom du bucket et son lien d'accès.
 
 .. code-block::
+    :linenos:
+    :caption: .env
 
     AWS_REGION=fr-par
     AWS_ACCESS_KEY_ID=*****
@@ -26,15 +30,18 @@ Il permet d'ajouter la configuration vers le bucket : la région, la clé d'acc�
     AWS_PUBLIC_BUCKET_NAME=dicoreen-dev
     AWS_ENDPOINT=https://s3.fr-par.scw.cloud
 
-Installer le module config permettant d'accèder au ConfigService :
+Installer le paquet config permettant d'accèder au ``ConfigService``. Ce service charge les variables contenues dans les fichiers ``.env`` et les rend accessible à travers le service ``ConfigService``.
 
 .. code-block::
 
     yarn add @nestjs/config
 
-Ajouter le module dans app.module.ts :
+Ajouter le module dans ``app.module.ts`` :
 
 .. code-block::
+    :emphasize-lines: 4
+    :linenos:
+    :caption: app.module.ts
 
     @Module({
         imports: [
@@ -52,9 +59,12 @@ Ajouter le sdk pour se connecter à AWS (Amazon Web Services) :
 
     yarn add aws-sdk @types/aws-sdk
 
-Ajouter la configuration du sdk dans main.ts :
+Ajouter la configuration du sdk dans ``main.ts`` :
 
 .. code-block::
+    :emphasize-lines: 9-15
+    :linenos:
+    :caption: main.ts
 
     import { ConfigService } from '@nestjs/config';
     // ...
@@ -76,25 +86,21 @@ Ajouter la configuration du sdk dans main.ts :
     }
     bootstrap();
 
-Ajouter UUID (Universally Unique IDentifier) pour avour un nom unique pour le fichier puis créer un service et un module pour la gestion des fichiers :
-
-.. code-block::
-
-    nest g service file
-    nest g module file
-
 Service et module de gestion des fichiers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------------------
+
+Créer un service et un module permettant de gérer les fichiers :
 
 .. code-block::
 
-    yarn add uuid @types/uuid
     nest g service file
     nest g module file
 
-Ajouter le code ci-desspus dans file.service.ts pour envoyer le fichier vers le bucket ou le supprimer :
+Ajouter le code ci-dessous dans ``file.service.ts`` pour envoyer le fichier vers le bucket ou le supprimer :
 
 .. code-block::
+    :linenos:
+    :caption: file.service.ts
 
     // import ...
     import { v4 as uuid } from 'uuid';
@@ -120,11 +126,17 @@ Ajouter le code ci-desspus dans file.service.ts pour envoyer le fichier vers le 
         }
     }
 
-Remarque : ``v4 as uuid`` renomme la variable.
+.. note::
+    Nous utilisons un UUID (Universally Unique IDentifier) comme clé pour les fichiers dans le bucket, c.a.d un identifiant unique généré aléatoirement lors de l'envoi du fichier. Il est nécéssaire d'installer une bibliothèque supplémentaire pour les générer : ``yarn add uuid @types/uuid``.
 
-Dans file.module.ts ajouter les imports, exports et providers :
+.. note::
+     ``v4 as uuid`` correspond au renommement la variable.
+
+Dans ``file.module.ts`` ajouter les imports, exports et providers qui conviennent pour utiliser le service de gestion de fichier :
 
 .. code-block::
+    :linenos:
+    :caption: file.module.ts
 
     // import ...
 
@@ -135,12 +147,19 @@ Dans file.module.ts ajouter les imports, exports et providers :
     })
     export class FileModule {}
 
-Ajout d'image pour Theme
-^^^^^^^^^^^^^^^^^^^^^^^^
+Implementation pour l'entité *Theme*
+------------------------------------
 
-Dans theme.module.ts ajouter l'import de FileModule :
+.. note::
+    
+    Il faut installer le paquet ``@types/multer`` pour pouvoir manipuler les fichiers envoyés en HTTP.
+
+Dans ``theme.module.ts`` ajouter l'import de ``FileModule`` :
 
 .. code-block::
+    :emphasize-lines: 7
+    :linenos:
+    :caption: theme.module.ts
 
     // import ...
     import { FileModule } from 'src/file/file.module';
@@ -155,9 +174,12 @@ Dans theme.module.ts ajouter l'import de FileModule :
     })
     export class ThemeModule {}
 
-Dans theme.service.ts ajouter la méthode qui permet envoyer le fichier sur S3 et ajouter son chemin dans le theme.
+Dans ``theme.service.ts`` ajouter la méthode qui permet envoyer le fichier sur S3 et ajouter son chemin dans le theme.
 
 .. code-block::
+    :emphasize-lines: 21-26
+    :linenos:
+    :caption: theme.service.ts
 
     // import ...
     import { FileService } from '../file/file.service';
@@ -187,9 +209,12 @@ Dans theme.service.ts ajouter la méthode qui permet envoyer le fichier sur S3 e
         }
     }
 
-Enfin, ajouter la requête post d'ajout d'image dans theme.controller.ts :
+Enfin, ajouter la requête post d'ajout d'image dans ``theme.controller.ts`` :
 
 .. code-block::
+    :emphasize-lines: 24-37
+    :linenos:
+    :caption: theme.controller.ts
 
     import { Controller, HttpException, HttpStatus, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
     import { FileInterceptor } from '@nestjs/platform-express';
@@ -199,6 +224,14 @@ Enfin, ajouter la requête post d'ajout d'image dans theme.controller.ts :
         model: {
             type: Theme,
         },
+        query: {
+            join: {
+                words: {
+                    eager: true,
+                    allow: [],
+                }
+            }
+        }
     })
 
     @ApiTags('themes')
@@ -222,13 +255,15 @@ Enfin, ajouter la requête post d'ajout d'image dans theme.controller.ts :
         }
     }
 
-Suppression et modification d'image pour Theme
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Suppression et remplacement des images
+--------------------------------------
 
-Créer un fichier theme.subscriber.ts pour ajouter des fonctions annexes lors de l'executions de certaines fonctions CRUD.
+Créer un fichier ``theme.subscriber.ts`` pour ajouter des fonctions annexes lors de l'executions de certaines fonctions CRUD.
 Ici nous avons créé des fonctions pour la suppression d'un thème et la modification.
 
 .. code-block::
+    :linenos:
+    :caption: theme.subscriber.ts
 
     // import ...
 
@@ -255,9 +290,12 @@ Ici nous avons créé des fonctions pour la suppression d'un thème et la modifi
         }
     }
 
-Ajouter theme.subscriber.ts au providers du fichier theme.module.ts :
+Ajouter ``theme.subscriber.ts`` au providers du fichier ``theme.module.ts`` :
 
 .. code-block::
+    :emphasize-lines: 8
+    :linenos:
+    :caption: theme.module.ts
 
     // import ...
 
@@ -275,7 +313,7 @@ Ajouter theme.subscriber.ts au providers du fichier theme.module.ts :
 Il faut utiliser ces mêmes principes pour les images de l'entité Word.
 
 Tests
-^^^^^
+-----
 
 Lien : https://github.com/nestjs/nest/tree/master/sample/29-file-upload
 
