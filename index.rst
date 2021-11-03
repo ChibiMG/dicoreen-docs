@@ -2,6 +2,8 @@
 Bienvenue sur la documentation de Dicoréen !
 ============================================
 
+Dicoréen est une application web de dictionnaire franco-coréen.
+
 .. toctree::
    :maxdepth: 2
    :caption: Sphinx :

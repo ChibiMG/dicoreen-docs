@@ -7,6 +7,10 @@ Le projet a été déployé sur Heroku, un PaaS (Plateform as a Service) permett
 
     Il faut avoir créer un compte sur le site https://www.heroku.com/
 
+.. note::
+
+    Il faut avoir déployé le projet sur Github.
+    
 Tuto 1 : https://dev.to/rosyshrestha/deploy-nestjs-typescript-app-to-heroku-27e
 
 Création de l'application
