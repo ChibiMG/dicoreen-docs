@@ -1,4 +1,4 @@
-Deploiement
+Déploiement
 ===========
 
 Pour deployer la documentation nous allons utiliser **Read the docs**.
